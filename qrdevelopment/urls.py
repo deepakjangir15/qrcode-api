@@ -1,6 +1,6 @@
-from django.urls import path
+from django.urls import path,re_path
 from .views import generate_qr
 
 urlpatterns = [
-    path('generate_qr/<str:url>/', generate_qr, name='generate_qr'),
+    re_path(r'^generate_qr/$', generate_qr, name='generate_qr'),
 ]
