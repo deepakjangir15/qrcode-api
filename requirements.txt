@@ -1,6 +1,10 @@
 asgiref==3.6.0
+autopep8==2.0.1
 Django==4.1.7
+Pillow==9.4.0
+pycodestyle==2.10.0
 pypng==0.20220715.0
 qrcode==7.4.2
 sqlparse==0.4.3
+tomli==2.0.1
 typing_extensions==4.5.0
