@@ -111,7 +111,8 @@ def generate_qr_with_image(request):
     return HttpResponse(status=405)
 
 
-def generate_simple_qr(request, url):
+def generate_simple_qr(request):
+    url = request.GET.get('url', '')
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
     qr.add_data(url)
     qr.make()
