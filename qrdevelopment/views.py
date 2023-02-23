@@ -10,15 +10,34 @@ import base64
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.colormasks import ImageColorMask
 
+
+def mask_images(logo):
+    # Create circular mask for image
+    mask = Image.new("L", logo.size, 0)
+    draw = ImageDraw.Draw(mask)
+    draw.ellipse((0, 0, logo.size[0], logo.size[1]), fill=255)
+
+    # Apply mask to image
+    logo.putalpha(mask)
+
+    return logo
+
 # 1. Uses File Image in Post request
 @csrf_exempt
 def generate_qr_with_image_file(request):
-    basewidth = 100
+    basewidth = 40
 
     if request.method == 'POST':
+
         url = request.POST.get('url', '')
         image_data = request.FILES.get('image', '')
-        QRcolor = request.POST.get('color', '')
+        QRcolor = request.POST.get('qrcolor', 'black')
+        BGcolor = request.POST.get('bgcolor', 'White')
+        box_size = request.POST.get('url_size', 10)
+        border_size = request.POST.get('spacing', 2)
+        mask_me = request.POST.get('circular_logo', 1)
+
+
         if image_data:
             # Load image
             image = Image.open(image_data)
@@ -27,9 +46,8 @@ def generate_qr_with_image_file(request):
             hsize = int((float(image.size[1])*float(wpercent)))
             logo = image.resize((basewidth, hsize), Image.ANTIALIAS)
 
-            QRcode = qrcode.QRCode(
-                error_correction=qrcode.constants.ERROR_CORRECT_H
-            )
+            QRcode = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
+
 
             # adding URL or text to QRcode
             QRcode.add_data(url)
@@ -37,16 +55,15 @@ def generate_qr_with_image_file(request):
             # generating QR code
             QRcode.make()
 
-            # taking color name from user
-            # QRcolor = 'Green'
-
             # adding color to QR code
-            QRimg = QRcode.make_image(fill_color=QRcolor, back_color="white").convert('RGB')
+            QRimg = QRcode.make_image(fill_color=QRcolor, back_color=BGcolor).convert('RGB')
+
+            logo = mask_images(logo)
 
             # set size of QR code
             pos = ((QRimg.size[0] - logo.size[0]) // 2,
                 (QRimg.size[1] - logo.size[1]) // 2)
-            QRimg.paste(logo, pos)
+            QRimg.paste(logo, pos,mask=logo if int(mask_me) else None)
 
 
             # Save image data to buffer
@@ -63,13 +80,16 @@ def generate_qr_with_image_file(request):
 # 2. Uses base64 as the input in post request
 @csrf_exempt
 def generate_qr_with_image(request):
-    basewidth = 100
+    basewidth = 40
 
     if request.method == 'POST':
         url = request.POST.get('url', '')
         base64_image = request.POST.get('base64_image','')
-        QRcolor = request.POST.get('qrcolor', '')
-        BGcolor = request.POST.get('bgcolor', '')
+        QRcolor = request.POST.get('qrcolor', 'black')
+        BGcolor = request.POST.get('bgcolor', 'White')
+        box_size = request.POST.get('url_size', 10)
+        border_size = request.POST.get('spacing', 2)
+        mask_me = request.POST.get('circular_logo', 1)
 
         if base64_image:
             # Load image
@@ -80,9 +100,7 @@ def generate_qr_with_image(request):
             hsize = int((float(image.size[1])*float(wpercent)))
             logo = image.resize((basewidth, hsize), Image.ANTIALIAS)
 
-            QRcode = qrcode.QRCode(
-                error_correction=qrcode.constants.ERROR_CORRECT_H
-            )
+            QRcode = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
 
             # adding URL or text to QRcode
             QRcode.add_data(url)
@@ -93,10 +111,12 @@ def generate_qr_with_image(request):
             # adding color to QR code
             QRimg = QRcode.make_image(fill_color=QRcolor, back_color=BGcolor).convert('RGB')
 
+            logo = mask_images(logo)
+
             # set size of QR code
             pos = ((QRimg.size[0] - logo.size[0]) // 2,
                 (QRimg.size[1] - logo.size[1]) // 2)
-            QRimg.paste(logo, pos)
+            QRimg.paste(logo, pos,mask=logo if int(mask_me) else None)
 
 
             # Save image data to buffer
@@ -113,10 +133,30 @@ def generate_qr_with_image(request):
 
 def generate_simple_qr(request):
     url = request.GET.get('url', '')
-    qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
+    box_size = request.GET.get('url_size', 10)
+    border_size = request.GET.get('spacing', 2)
+    qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
     qr.add_data(url)
     qr.make()
     img = qr.make_image(fill_color="black", back_color="white")
+    buffer = BytesIO()
+    img.save(buffer, format='PNG')
+    image_png = buffer.getvalue()
+    buffer.close()
+    response = HttpResponse(image_png, content_type="image/png")
+    return response
+
+def generate_colored_qr(request):
+    url = request.GET.get('url', '')
+    box_size = request.GET.get('url_size', 10)
+    border_size = request.GET.get('spacing', 2)
+    QRcolor = request.POST.get('qrcolor', 'black')
+    BGcolor = request.POST.get('bgcolor', 'White')
+
+    qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
+    qr.add_data(url)
+    qr.make()
+    img = qr.make_image(fill_color=QRcolor, back_color=BGcolor)
     buffer = BytesIO()
     img.save(buffer, format='PNG')
     image_png = buffer.getvalue()
