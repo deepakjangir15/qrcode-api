@@ -146,10 +146,13 @@ def generate_qr_with_image(request):
 
 @csrf_exempt
 def generate_simple_qr(request):
+
     QR_data = request.GET.get('QR_data', '')
     box_size = request.GET.get('QR_size', 10)
     border_size = request.GET.get('spacing', 2)
-    force_download = request.POST.get('download_file',0)
+    force_download = request.GET.get('download_file',0)
+
+    print("The values is ",QR_data)
 
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
     qr.add_data(QR_data)
@@ -169,8 +172,8 @@ def generate_colored_qr(request):
     QR_data = request.GET.get('QR_data', '')
     box_size = request.GET.get('QR_size', 10)
     border_size = request.GET.get('spacing', 2)
-    QRcolor = request.POST.get('qrcolor', 'black')
-    BGcolor = request.POST.get('bgcolor', 'White')
+    QRcolor = request.GET.get('qrcolor', 'black')
+    BGcolor = request.GET.get('bgcolor', 'White')
 
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
     qr.add_data(QR_data)
