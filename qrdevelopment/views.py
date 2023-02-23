@@ -29,7 +29,7 @@ def generate_qr_with_image_file(request):
 
     if request.method == 'POST':
 
-        qr_data = request.POST.get('qr_data', '')
+        QR_data = request.POST.get('QR_data', '')
         image_data = request.FILES.get('image', '')
         QRcolor = request.POST.get('qrcolor', 'black')
         BGcolor = request.POST.get('bgcolor', 'White')
@@ -50,8 +50,8 @@ def generate_qr_with_image_file(request):
             QRcode = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
 
 
-            # adding qr_data or text to QRcode
-            QRcode.add_data(qr_data)
+            # adding QR_data or text to QRcode
+            QRcode.add_data(QR_data)
 
             # generating QR code
             QRcode.make()
@@ -89,7 +89,7 @@ def generate_qr_with_image(request):
     basewidth = 40
 
     if request.method == 'POST':
-        qr_data = request.POST.get('qr_data', '')
+        QR_data = request.POST.get('QR_data', '')
         base64_image = request.POST.get('base64_image','')
         QRcolor = request.POST.get('qrcolor', 'black')
         BGcolor = request.POST.get('bgcolor', 'White')
@@ -109,8 +109,8 @@ def generate_qr_with_image(request):
 
             QRcode = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
 
-            # adding qr_data or text to QRcode
-            QRcode.add_data(qr_data)
+            # adding QR_data or text to QRcode
+            QRcode.add_data(QR_data)
 
             # generating QR code
             QRcode.make()
@@ -143,13 +143,13 @@ def generate_qr_with_image(request):
 
 
 def generate_simple_qr(request):
-    qr_data = request.GET.get('qr_data', '')
+    QR_data = request.GET.get('QR_data', '')
     box_size = request.GET.get('QR_size', 10)
     border_size = request.GET.get('spacing', 2)
     force_download = request.POST.get('download_file',0)
 
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
-    qr.add_data(qr_data)
+    qr.add_data(QR_data)
     qr.make()
     img = qr.make_image(fill_color="black", back_color="white")
     buffer = BytesIO()
@@ -163,14 +163,14 @@ def generate_simple_qr(request):
 
 
 def generate_colored_qr(request):
-    qr_data = request.GET.get('qr_data', '')
+    QR_data = request.GET.get('QR_data', '')
     box_size = request.GET.get('QR_size', 10)
     border_size = request.GET.get('spacing', 2)
     QRcolor = request.POST.get('qrcolor', 'black')
     BGcolor = request.POST.get('bgcolor', 'White')
 
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
-    qr.add_data(qr_data)
+    qr.add_data(QR_data)
     qr.make()
     img = qr.make_image(fill_color=QRcolor, back_color=BGcolor)
     buffer = BytesIO()
