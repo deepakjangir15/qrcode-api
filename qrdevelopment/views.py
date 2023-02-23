@@ -36,6 +36,7 @@ def generate_qr_with_image_file(request):
         box_size = request.POST.get('url_size', 10)
         border_size = request.POST.get('spacing', 2)
         mask_me = request.POST.get('circular_logo', 1)
+        force_download = request.POST.get('download_file',0)
 
 
         if image_data:
@@ -72,9 +73,14 @@ def generate_qr_with_image_file(request):
             image_png = buffer.getvalue()
             buffer.close()
 
-            # Return image as HTTP response
+            # Return image as HTTP response with Content-Disposition header set to force download
             response = HttpResponse(image_png, content_type="image/png")
+
+            if force_download:
+                response['Content-Disposition'] = 'attachment; filename=qr_code.png'
+
             return response
+        
     return HttpResponse(status=405)
 
 # 2. Uses base64 as the input in post request
@@ -90,6 +96,7 @@ def generate_qr_with_image(request):
         box_size = request.POST.get('url_size', 10)
         border_size = request.POST.get('spacing', 2)
         mask_me = request.POST.get('circular_logo', 1)
+        force_download = request.POST.get('download_file',0)
 
         if base64_image:
             # Load image
@@ -127,6 +134,10 @@ def generate_qr_with_image(request):
 
             # Return image as HTTP response
             response = HttpResponse(image_png, content_type="image/png")
+
+            if force_download:
+                response['Content-Disposition'] = 'attachment; filename=qr_code.png'
+
             return response
     return HttpResponse(status=405)
 
@@ -135,6 +146,8 @@ def generate_simple_qr(request):
     url = request.GET.get('url', '')
     box_size = request.GET.get('url_size', 10)
     border_size = request.GET.get('spacing', 2)
+    force_download = request.POST.get('download_file',0)
+    
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
     qr.add_data(url)
     qr.make()
@@ -144,7 +157,10 @@ def generate_simple_qr(request):
     image_png = buffer.getvalue()
     buffer.close()
     response = HttpResponse(image_png, content_type="image/png")
+    if force_download:
+        response['Content-Disposition'] = 'attachment; filename=qr_code.png'
     return response
+
 
 def generate_colored_qr(request):
     url = request.GET.get('url', '')
