@@ -33,7 +33,7 @@ def generate_qr_with_image_file(request):
         image_data = request.FILES.get('image', '')
         QRcolor = request.POST.get('qrcolor', 'black')
         BGcolor = request.POST.get('bgcolor', 'White')
-        box_size = request.POST.get('url_size', 10)
+        box_size = request.POST.get('QR_size', 10)
         border_size = request.POST.get('spacing', 2)
         mask_me = request.POST.get('circular_logo', 1)
         force_download = request.POST.get('download_file',0)
@@ -93,7 +93,7 @@ def generate_qr_with_image(request):
         base64_image = request.POST.get('base64_image','')
         QRcolor = request.POST.get('qrcolor', 'black')
         BGcolor = request.POST.get('bgcolor', 'White')
-        box_size = request.POST.get('url_size', 10)
+        box_size = request.POST.get('QR_size', 10)
         border_size = request.POST.get('spacing', 2)
         mask_me = request.POST.get('circular_logo', 1)
         force_download = request.POST.get('download_file',0)
@@ -144,10 +144,10 @@ def generate_qr_with_image(request):
 
 def generate_simple_qr(request):
     url = request.GET.get('url', '')
-    box_size = request.GET.get('url_size', 10)
+    box_size = request.GET.get('QR_size', 10)
     border_size = request.GET.get('spacing', 2)
     force_download = request.POST.get('download_file',0)
-    
+
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
     qr.add_data(url)
     qr.make()
@@ -164,7 +164,7 @@ def generate_simple_qr(request):
 
 def generate_colored_qr(request):
     url = request.GET.get('url', '')
-    box_size = request.GET.get('url_size', 10)
+    box_size = request.GET.get('QR_size', 10)
     border_size = request.GET.get('spacing', 2)
     QRcolor = request.POST.get('qrcolor', 'black')
     BGcolor = request.POST.get('bgcolor', 'White')
