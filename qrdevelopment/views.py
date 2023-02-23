@@ -59,6 +59,9 @@ def generate_qr_with_image_file(request):
             # adding color to QR code
             QRimg = QRcode.make_image(fill_color=QRcolor, back_color=BGcolor).convert('RGB')
 
+            width, height = QRimg.size
+            print( width, height)
+
             logo = mask_images(logo)
 
             # set size of QR code
@@ -141,7 +144,7 @@ def generate_qr_with_image(request):
             return response
     return HttpResponse(status=405)
 
-
+@csrf_exempt
 def generate_simple_qr(request):
     QR_data = request.GET.get('QR_data', '')
     box_size = request.GET.get('QR_size', 10)
@@ -161,7 +164,7 @@ def generate_simple_qr(request):
         response['Content-Disposition'] = 'attachment; filename=qr_code.png'
     return response
 
-
+@csrf_exempt
 def generate_colored_qr(request):
     QR_data = request.GET.get('QR_data', '')
     box_size = request.GET.get('QR_size', 10)
