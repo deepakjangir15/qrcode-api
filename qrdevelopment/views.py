@@ -44,10 +44,10 @@ def generate_qr_with_image_file(request):
             # Load image
             image = Image.open(image_data)
 
-            wpercent = (basewidth/float(image.size[0]))
-            hsize = int((float(image.size[1])*float(wpercent)))
-            logo = image.resize((basewidth, hsize), Image.ANTIALIAS)
+            wpercent = int(int(box_size) * 3.5)
 
+            logo = image.resize((wpercent,wpercent), Image.ANTIALIAS)
+            
             QRcode = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
 
 
@@ -117,9 +117,9 @@ def generate_qr_with_image(request):
             image_data = base64.b64decode(base64_image)
             image = Image.open(BytesIO(image_data))
 
-            wpercent = (basewidth/float(image.size[0]))
-            hsize = int((float(image.size[1])*float(wpercent)))
-            logo = image.resize((basewidth, hsize), Image.ANTIALIAS)
+            wpercent = int(int(box_size) * 3.5)
+
+            logo = image.resize((wpercent,wpercent), Image.ANTIALIAS)
 
             QRcode = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
 
