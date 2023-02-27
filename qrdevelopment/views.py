@@ -47,7 +47,7 @@ def generate_qr_with_image_file(request):
             wpercent = int(int(box_size) * 3.5)
 
             logo = image.resize((wpercent,wpercent), Image.ANTIALIAS)
-            
+
             QRcode = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
 
 
@@ -168,20 +168,33 @@ def generate_simple_qr(request):
     border_size = request.GET.get('spacing', 2)
     force_download = request.GET.get('download_file',0)
 
-    print("The values is ",QR_data)
+    cache_key = 'qr_code_' + QR_data + '_' + str(box_size) + '_' + str(border_size) + '_' + str(force_download)
+    image_png = cache.get(cache_key)
 
-    qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
-    qr.add_data(QR_data)
-    qr.make()
-    img = qr.make_image(fill_color="black", back_color="white")
-    buffer = BytesIO()
-    img.save(buffer, format='PNG')
-    image_png = buffer.getvalue()
-    buffer.close()
-    response = HttpResponse(image_png, content_type="image/png")
-    if force_download:
-        response['Content-Disposition'] = 'attachment; filename=qr_code.png'
-    return response
+    if image_png:
+        print('Cache found : ', cache_key)
+        response = HttpResponse(image_png, content_type="image/png")
+        if force_download:
+            response['Content-Disposition'] = 'attachment; filename=qr_code.png'
+        return response
+    
+    else:
+        # Generate a new QR Code and cache it
+        qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
+        qr.add_data(QR_data)
+        qr.make()
+        img = qr.make_image(fill_color="black", back_color="white")
+        buffer = BytesIO()
+        img.save(buffer, format='PNG')
+        image_png = buffer.getvalue()
+        buffer.close()
+        # Add image to cache
+        cache.set(cache_key, image_png, timeout=3600)
+        
+        response = HttpResponse(image_png, content_type="image/png")
+        if force_download:
+            response['Content-Disposition'] = 'attachment; filename=qr_code.png'
+        return response
 
 @csrf_exempt
 def generate_colored_qr(request):
@@ -190,14 +203,28 @@ def generate_colored_qr(request):
     border_size = request.GET.get('spacing', 2)
     QRcolor = request.GET.get('qrcolor', 'black')
     BGcolor = request.GET.get('bgcolor', 'White')
+    force_download = request.GET.get('download_file',0)
 
-    qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
-    qr.add_data(QR_data)
-    qr.make()
-    img = qr.make_image(fill_color=QRcolor, back_color=BGcolor)
-    buffer = BytesIO()
-    img.save(buffer, format='PNG')
-    image_png = buffer.getvalue()
-    buffer.close()
-    response = HttpResponse(image_png, content_type="image/png")
-    return response
+    cache_key = 'qr_code_' + QR_data + '_' + str(box_size) + '_' + str(border_size) + '_' + str(QRcolor) + '_' + str(BGcolor) 
+
+    image_png = cache.get(cache_key)
+
+    if image_png:
+        response = HttpResponse(image_png, content_type="image/png")
+        if force_download:
+            response['Content-Disposition'] = 'attachment; filename=qr_code.png'
+        return response
+    
+    else:
+        qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=box_size, border = border_size)
+        qr.add_data(QR_data)
+        qr.make()
+        img = qr.make_image(fill_color=QRcolor, back_color=BGcolor)
+        buffer = BytesIO()
+        img.save(buffer, format='PNG')
+        image_png = buffer.getvalue()
+        buffer.close()
+        # Add image to cache
+        cache.set(cache_key, image_png, timeout=3600)
+        response = HttpResponse(image_png, content_type="image/png")
+        return response
