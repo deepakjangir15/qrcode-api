@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from django.core.cache import cache
 
 # Create your views here.
 import qrcode
@@ -101,6 +102,16 @@ def generate_qr_with_image(request):
         mask_me = request.POST.get('circular_logo', 1)
         force_download = request.POST.get('download_file',0)
 
+        cache_key = 'qr_code_' + QR_data + '_' + QRcolor + '_' + BGcolor + '_' + str(box_size) + '_' + str(border_size) + '_' + str(mask_me)
+        image_png = cache.get(cache_key)
+
+        if image_png:
+            # Return cached image as HTTP response
+            response = HttpResponse(image_png, content_type="image/png")
+            if force_download:
+                response['Content-Disposition'] = 'attachment; filename=qr_code.png'
+            return response
+
         if base64_image:
             # Load image
             image_data = base64.b64decode(base64_image)
@@ -135,6 +146,10 @@ def generate_qr_with_image(request):
             image_png = buffer.getvalue()
             buffer.close()
 
+            # Add image to cache
+            cache.set(cache_key, image_png, timeout=3600)
+
+
             # Return image as HTTP response
             response = HttpResponse(image_png, content_type="image/png")
 
@@ -144,6 +159,7 @@ def generate_qr_with_image(request):
             return response
     return HttpResponse(status=405)
 
+# 3. Generate simple QR code
 @csrf_exempt
 def generate_simple_qr(request):
 
