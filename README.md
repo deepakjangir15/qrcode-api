@@ -1,5 +1,7 @@
 # QreativeQR: A Customizable QR Code Generator API Documentation
 
+API link: https://rapidapi.com/tdeepak509/api/qreativeqr-a-customizable-qr-code-generator
+
 The QR code generator API is a powerful tool that allows users to generate custom QR codes with ease. With this API, you can create a simple QR code, customize the size, border size, and color of the QR code, set the background color, and even insert an image or logo in between the QR code. The image can be a base64 image or uploaded via a POST request. With these powerful features, this API provides users with the flexibility they need to create custom QR codes that match their brand or application’s design.
 
 ### Three endpoints:
